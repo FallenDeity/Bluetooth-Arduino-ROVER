@@ -3,7 +3,7 @@
 #include "core/bot.h"
 
 Core::Motor left{2, 3}, right{4, 5};
-SoftwareSerial mySerial(0, 1);
+SoftwareSerial mySerial(10, 11);
 Core::Bot bot{left, right};
 
 
@@ -24,9 +24,9 @@ void loop() {
         Serial.print("I received: ");
         Serial.println(inChar);
         if ((inChar >= '1' && inChar <= '9') || 'q' == inChar) {
-            bot.setSpeed((inChar == 'q') ? 100 : int(inChar) * 10);
+            bot.setSpeed((inChar == 'q') ? 100 : abs(int(inChar) * 10));
             Serial.print("Speed set to: ");
-            Serial.println(int(inChar));
+            Serial.println(int(bot.speed));
         }
         switch (inChar) {
             case 'f':

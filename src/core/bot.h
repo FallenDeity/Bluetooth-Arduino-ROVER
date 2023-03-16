@@ -25,10 +25,10 @@ namespace Core {
         void stop();
         void setSpeed(int percent);
         Motor leftMotor{}, rightMotor{};
+        unsigned int speed{};
 
     private:
         constexpr static int MAX_SPEED = 255;
-        int speed{};
     };
 }
 
