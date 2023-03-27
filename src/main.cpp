@@ -11,6 +11,7 @@ BluetoothSerial SerialBT;
 Core::Motor left{13, 14}, right{18, 19};
 Core::Bot bot{left, right};
 static char buffer;
+constexpr bool JOYSTICK = false;
 
 
 void setup() {
@@ -37,12 +38,10 @@ void readModel() {
     Core::Control left_{false, 0};
     Core::Control right_{false, 0};
     while (SerialBT.available() > 0) {
-        const char *line = SerialBT.readStringUntil('\n').c_str();
-        std::string token = std::string(line).substr(0, std::string(line).find(','));
-        left_.fromPayload(token);
-        token = std::string(line).substr(std::string(line).find(',') + 1);
-        right_.fromPayload(token);
-        Serial.write(line);
+        std::string line = SerialBT.readStringUntil('\n').c_str();
+        left_.fromPayload(line.substr(0, line.find(',')));
+        right_.fromPayload(line.substr(line.find(',') + 1));
+        Serial.write(line.c_str());
         Serial.println();
         bot.controlMotors(left_, right_);
     }
@@ -51,46 +50,50 @@ void readModel() {
 
 void loop() {
     if (SerialBT.available()) {
-        char inChar = getFirstChar();
-        Serial.print("I received: ");
-        Serial.println(inChar);
-        if ((inChar >= '1' && inChar <= '9') || 'q' == inChar) {
-            if ('q' == inChar) {
-                bot.setSpeed(100);
-            } else {
-                bot.setSpeed((inChar - '0') * 10);
-            }
-            Serial.print("Setting speed to ");
-            Serial.println(bot.speed);
-        }
-        if ('f' == inChar) {
-            Serial.println("Moving forward");
-            bot.linear(true);
-        } else if ('b' == inChar) {
-            Serial.println("Moving backward");
-            bot.linear(false);
-        } else if ('l' == inChar) {
-            Serial.println("Turning left");
-            bot.turn(false);
-        } else if ('r' == inChar) {
-            Serial.println("Turning right");
-            bot.turn(true);
-        } else if ('g' == inChar) {
-            Serial.println("Moving forward left");
-            bot.diagonal(true, false);
-        } else if ('i' == inChar) {
-            Serial.println("Moving forward right");
-            bot.diagonal(true, true);
-        } else if ('h' == inChar) {
-            Serial.println("Moving backward left");
-            bot.diagonal(false, true);
-        } else if ('j' == inChar) {
-            Serial.println("Moving backward right");
-            bot.diagonal(false, false);
+        if (JOYSTICK) {
+            readModel();
         } else {
-            bot.stop();
+            char inChar = getFirstChar();
+            Serial.print("I received: ");
+            Serial.println(inChar);
+            if ((inChar >= '1' && inChar <= '9') || 'q' == inChar) {
+                if ('q' == inChar) {
+                    bot.setSpeed(100);
+                } else {
+                    bot.setSpeed((inChar - '0') * 10);
+                }
+                Serial.print("Setting speed to ");
+                Serial.println(bot.speed);
+            }
+            if ('f' == inChar) {
+                Serial.println("Moving forward");
+                bot.linear(true);
+            } else if ('b' == inChar) {
+                Serial.println("Moving backward");
+                bot.linear(false);
+            } else if ('l' == inChar) {
+                Serial.println("Turning left");
+                bot.turn(false);
+            } else if ('r' == inChar) {
+                Serial.println("Turning right");
+                bot.turn(true);
+            } else if ('g' == inChar) {
+                Serial.println("Moving forward left");
+                bot.diagonal(true, false);
+            } else if ('i' == inChar) {
+                Serial.println("Moving forward right");
+                bot.diagonal(true, true);
+            } else if ('h' == inChar) {
+                Serial.println("Moving backward left");
+                bot.diagonal(false, true);
+            } else if ('j' == inChar) {
+                Serial.println("Moving backward right");
+                bot.diagonal(false, false);
+            } else {
+                bot.stop();
+            }
+            buffer = inChar;
         }
-        buffer = inChar;
-        delay(10);
     }
+    delay(10);
 }
