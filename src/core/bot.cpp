@@ -52,6 +52,13 @@ namespace Core {
         speed = (percent * MAX_SPEED) / 100;
     }
 
+    void Bot::controlMotors(Control left, Control right) const {
+        digitalWrite(leftMotor.pin1, left.reverse);
+        digitalWrite(rightMotor.pin1, right.reverse);
+        analogWrite(leftMotor.pwm, left.speed);
+        analogWrite(rightMotor.pwm, right.speed);
+    }
+
     Bot::Bot(Motor leftMotor, Motor rightMotor) {
         this->leftMotor = leftMotor;
         this->rightMotor = rightMotor;

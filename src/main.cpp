@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include <string>
 #include "core/bot.h"
 #include "BluetoothSerial.h"
 
@@ -29,6 +30,22 @@ char getFirstChar() {
         SerialBT.read();
     }
     return (inChar != '\n' && inChar != '\r') ? inChar : buffer;
+}
+
+
+void readModel() {
+    Core::Control left_{false, 0};
+    Core::Control right_{false, 0};
+    while (SerialBT.available() > 0) {
+        const char *line = SerialBT.readStringUntil('\n').c_str();
+        std::string token = std::string(line).substr(0, std::string(line).find(','));
+        left_.fromPayload(token);
+        token = std::string(line).substr(std::string(line).find(',') + 1);
+        right_.fromPayload(token);
+        Serial.write(line);
+        Serial.println();
+        bot.controlMotors(left_, right_);
+    }
 }
 
 
