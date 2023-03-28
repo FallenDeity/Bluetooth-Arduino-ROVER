@@ -23,7 +23,11 @@ namespace Core {
 
         void fromPayload(const std::string &data) {
             reverse = data[0] == '-';
-            speed = std::stoi(data.substr(1));
+            speed = abs(std::stoi(data));
+            Serial.print("Reverse: ");
+            Serial.print(reverse);
+            Serial.print(" Speed: ");
+            Serial.println(speed);
         }
 
     };
@@ -39,7 +43,7 @@ namespace Core {
 
         void diagonal(bool forward, bool right) const;
 
-        void controlMotors(Control left, Control right) const;
+        void controlMotors(Control left, Control right);
 
         void stop();
 
