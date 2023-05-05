@@ -9,6 +9,7 @@ namespace Core {
         digitalWrite(rightMotor.pin1, forward);
         analogWrite(leftMotor.pwm, speed);
         analogWrite(rightMotor.pwm, speed);
+        Serial.printf("Moving %s with speed %d\n", forward ? "forward" : "backward", speed);
     }
 
     void Bot::turn(bool right) const {
@@ -16,6 +17,7 @@ namespace Core {
         digitalWrite(rightMotor.pin1, !right);
         analogWrite(leftMotor.pwm, speed);
         analogWrite(rightMotor.pwm, speed);
+        Serial.printf("Turning %s with speed %d\n", right ? "right" : "left", speed);
     }
 
     void Bot::diagonal(bool forward, bool right) const {
@@ -29,6 +31,7 @@ namespace Core {
                 analogWrite(leftMotor.pwm, speed / 2);
                 analogWrite(rightMotor.pwm, speed);
             }
+            Serial.printf("Moving %s with speed %d\n", right ? "forward-right" : "forward-left", speed);
         } else {
             digitalWrite(leftMotor.pin1, forward);
             digitalWrite(rightMotor.pin1, forward);
@@ -39,17 +42,18 @@ namespace Core {
                 analogWrite(leftMotor.pwm, speed);
                 analogWrite(rightMotor.pwm, speed / 2);
             }
+            Serial.printf("Moving %s with speed %d\n", right ? "backward-left" : "backward-right", speed);
         }
     }
 
-    void Bot::stop() {
-        speed = 0;
-        analogWrite(leftMotor.pwm, speed);
-        analogWrite(rightMotor.pwm, speed);
+    void Bot::stop() const {
+        analogWrite(leftMotor.pwm, 0);
+        analogWrite(rightMotor.pwm, 0);
     }
 
     void Bot::setSpeed(int percent) {
         speed = (percent * MAX_SPEED) / 100;
+        Serial.printf("Speed set to %d\n", speed);
     }
 
     void Bot::controlMotors(Control left, Control right) {
@@ -63,8 +67,8 @@ namespace Core {
         analogWrite(rightMotor.pwm, right.speed);
     }
 
-    Bot::Bot(Motor leftMotor, Motor rightMotor) {
-        this->leftMotor = leftMotor;
-        this->rightMotor = rightMotor;
+    Bot::Bot(Motor leftMotor, Motor rightMotor) : leftMotor(leftMotor), rightMotor(rightMotor) {
+        leftMotor.declarePins();
+        rightMotor.declarePins();
     }
 }

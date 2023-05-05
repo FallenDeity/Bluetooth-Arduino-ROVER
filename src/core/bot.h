@@ -8,8 +8,8 @@
 namespace Core {
 
     struct Motor {
-        int pin1;
-        int pwm;
+        uint8_t pin1;
+        uint8_t pwm;
 
         void declarePins() const {
             pinMode(pin1, OUTPUT);
@@ -45,12 +45,15 @@ namespace Core {
 
         void controlMotors(Control left, Control right);
 
-        void stop();
+        void stop() const;
 
         void setSpeed(int percent);
 
-        Motor leftMotor{}, rightMotor{};
-        int speed{};
+        int speed{255};
+
+        Motor leftMotor;
+
+        Motor rightMotor;
 
     private:
         constexpr static int MAX_SPEED = 255;
