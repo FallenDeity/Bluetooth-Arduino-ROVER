@@ -19,11 +19,11 @@ namespace Core {
 
     struct Control {
         bool reverse;
-        int speed;
+        uint8_t speed;
 
         void fromPayload(const std::string &data) {
             reverse = data[0] == '-';
-            speed = abs(std::stoi(data));
+            speed = (uint8_t) abs(std::stoi(data));
             Serial.print("Reverse: ");
             Serial.print(reverse);
             Serial.print(" Speed: ");
@@ -43,7 +43,7 @@ namespace Core {
 
         void diagonal(bool forward, bool right) const;
 
-        void controlMotors(Control left, Control right);
+        void controlMotors(Control left, Control right) const;
 
         void stop() const;
 
