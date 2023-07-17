@@ -1,24 +1,24 @@
 #include "Arduino.h"
 #include "core/bot.h"
-#include "BluetoothSerial.h"
+#include "core/speaker.h"
+#include "SoftwareSerial.h"
 
-#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
-#endif
-
-const bool JOYSTICK_MODE = true;
-Core::Motor left{14, 12};
-Core::Motor right{26, 27};
+utility::Speaker speaker{3};
+Core::Motor left{7, 12, 9};
+Core::Motor right{8, 4, 6};
 Core::Bot bot{left, right};
-BluetoothSerial SerialBT;
+SoftwareSerial SerialBT(10, 11);
 static char buffer { 's' };
 
 
 void setup() {
     Serial.println("Setting up baud rate");
     Serial.begin(115200);
-    SerialBT.begin("ESPROVER_TECHNOXIAN");
+    SerialBT.begin(9600);
+    Serial.println("Setting up speaker");
+    randomSeed(analogRead(0));
     Serial.println("Robot is ready");
+    speaker.speak();
 }
 
 
@@ -31,28 +31,16 @@ char getFirstChar() {
 }
 
 
-void joystickControl() {
-    std::string line = SerialBT.readStringUntil('\n').c_str();
-    if (line.empty()) {
-        return;
-    }
-    Core::Control left_{false, 0};
-    Core::Control right_{false, 0};
-    Serial.println(line.c_str());
-    left_.fromPayload(line.substr(0, line.find(',')));
-    right_.fromPayload(line.substr(line.find(',') + 1));
-    bot.controlMotors(left_, right_);
-}
-
-
 void characterControl() {
     char inChar = getFirstChar();
     if ((inChar >= '1' && inChar <= '9') || 'q' == inChar) {
         if ('q' == inChar) {
-            bot.setSpeed(100);
-        } else {
-            bot.setSpeed((inChar - '0') * 10);
+            bot.speed = 255;
         }
+        else {
+            bot.speed = (inChar - '0') * 10 * 255 / 100;
+        }
+        Serial.println("Speed: " + String(bot.speed));
     }
     if ('f' == inChar) {
         bot.linear(true);
@@ -70,6 +58,11 @@ void characterControl() {
         bot.diagonal(false, false);
     } else if ('j' == inChar) {
         bot.diagonal(false, true);
+    } else if ('v' == inChar) {
+        speaker.state = !speaker.state;
+        if (speaker.state) {
+            speaker.speak();
+        }
     } else {
         bot.stop();
     }
@@ -79,6 +72,6 @@ void characterControl() {
 
 void loop() {
     if (SerialBT.available()) {
-        JOYSTICK_MODE ? joystickControl() : characterControl();
+        characterControl();
     }
 }
